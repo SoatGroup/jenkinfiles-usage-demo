@@ -24,7 +24,7 @@ pipeline {
         stage('FAKE SEND EMAIL CONDITION') {
             when {
                 beforeInput false
-                environment name: 'SEND_EMAIL', value: true
+                environment name: 'SEND_EMAIL', value: 'true'
             }
             input {
                 message "Set the release name"
