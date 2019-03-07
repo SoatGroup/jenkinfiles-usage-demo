@@ -39,6 +39,11 @@ pipeline {
                 echo("Template email with release name ${RELEASE_NAME} - Executed !")
             }
         }
+        stage('END') {
+            steps {
+                sh('env')
+            }
+        }
        
         
     }
