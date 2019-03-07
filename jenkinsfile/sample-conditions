@@ -16,7 +16,6 @@ pipeline {
                      branch 'master'
                      expression { BRANCH_NAME ==~ /feature\/.*/ }
                 }
-               
             }
             steps {
                 echo('CONDITION - Executed (Only on master and feature/* branch) !')
@@ -26,13 +25,20 @@ pipeline {
         stage('SEND EMAIL CONDITION') {
             when {
                 beforeInput true
-                expression { BRANCH_NAME ==~ /feature\/.*/ }
+                environment name: 'RELEASE_NAME', value: '1.0.0'
             }
             input {
-                message "Send a email ?"
-                ok "Deploy the release ${RELEASE_NAME}"
+                message "Set the release name"
+                ok "Deploy the release"
                 parameters {
-                    string(name: 'RELEASE_NAME', defaultValue: '0.0.1', description: 'The fake release name for templating a fake email')
+                    string(name: 'RELEASE_NAME', defaultValue: '0.0.1', description: 'The fake release name for templating')
+                }
+            }
+            input {
+                message "Send email ?"
+                ok "Send a email"
+                parameters {
+                    booleanParam(name: 'SEND_EMAIL', defaultValue: true, description: 'Should we send a fake email ?')
                 }
             }
             steps {
