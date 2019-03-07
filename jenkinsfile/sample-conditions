@@ -11,7 +11,7 @@ pipeline {
 
     parameters {
         string(name: 'RELEASE_NAME', defaultValue: '0.0.1', description: 'What is the name of this release ?')
-        booleanParam(name: 'SEND_EMAIL', defaultValue: true, description: 'Execute a fake release')
+        booleanParam(name: 'SEND_EMAIL', defaultValue: true, description: 'Send a fake email')
     }
 
     stages {
@@ -27,10 +27,10 @@ pipeline {
                 echo('CONDITION - Executed (Only on master and feature/* branch) !')
             }
         }
-        stage('INPUT CONDITION') {
-            when {
-                beforeInput true
-            }
+        stage('RELEASE CONDITION') {
+            // when {
+            //     beforeInput true
+            // }
             input {
                 message "Proceed ?"
                 ok "Deploy the release ${env.RELEASE_NAME}"
@@ -43,12 +43,12 @@ pipeline {
                 sh('env')
             }
         }
-        stage('DOCKER CONDITION') {
+        stage('EMAIL CONDITION - INSIDE DOCKER') {
             when {
-                environment name: 'DEPLOY_TO', value: 'production'
+                environment name: 'SEND_EMAIL', value: '1'
             }
             steps {
-                echo('DOCKER CONDITION - Executed')
+                echo('DOCKER CONDITION - Execute fake send email')
                 sh('env')
             }
         }
