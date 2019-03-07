@@ -9,11 +9,6 @@ pipeline {
         timeout(time: 1, unit: 'MINUTES')
     }
 
-    parameters {
-        string(name: 'RELEASE_NAME', defaultValue: '0.0.1', description: 'What is the name of this release ?')
-        booleanParam(name: 'SEND_EMAIL', defaultValue: true, description: 'Send a fake email')
-    }
-
     stages {
         stage('SIMPLE CONDITION') {
             when {
@@ -25,33 +20,26 @@ pipeline {
             }
             steps {
                 echo('CONDITION - Executed (Only on master and feature/* branch) !')
+                sh('env')
             }
         }
-        stage('RELEASE CONDITION') {
-            // when {
-            //     beforeInput true
-            // }
+        stage('SEND EMAIL CONDITION') {
+            when {
+                beforeInput true
+                expression { BRANCH_NAME ==~ /feature\/.*/ }
+            }
             input {
-                message "Proceed ?"
-                ok "Deploy the release ${env.RELEASE_NAME}"
+                message "Send a email ?"
+                ok "Deploy the release ${RELEASE_NAME}"
                 parameters {
-                    string(name: 'CONTINUE', defaultValue: 'NO', description: 'XXXX')
+                    string(name: 'RELEASE_NAME', defaultValue: '0.0.1', description: 'The fake release name for templating a fake email')
                 }
             }
             steps {
-                echo('CONDITION - Executed !')
-                sh('env')
+                echo("Template email with release name ${RELEASE_NAME} - Executed !")
             }
         }
-        stage('EMAIL CONDITION - INSIDE DOCKER') {
-            when {
-                environment name: 'SEND_EMAIL', value: '1'
-            }
-            steps {
-                echo('DOCKER CONDITION - Execute fake send email')
-                sh('env')
-            }
-        }
+       
         
     }
     
