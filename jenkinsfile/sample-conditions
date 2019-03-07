@@ -32,12 +32,6 @@ pipeline {
                 ok "Deploy the release"
                 parameters {
                     string(name: 'RELEASE_NAME', defaultValue: '0.0.1', description: 'The fake release name for templating')
-                }
-            }
-            input {
-                message "Send email ?"
-                ok "Send a email"
-                parameters {
                     booleanParam(name: 'SEND_EMAIL', defaultValue: true, description: 'Should we send a fake email ?')
                 }
             }
