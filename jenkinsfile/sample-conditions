@@ -1,0 +1,55 @@
+// WIP
+pipeline {
+
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        timeout(time: 1, unit: 'MINUTES')
+    }
+
+    parameters {
+        string(name: 'RELEASE_NAME', defaultValue: '0.0.1', description: 'What is the name of this release ?')
+        booleanParam(name: 'SEND_EMAIL', defaultValue: true, description: 'Execute a fake release')
+    }
+
+    stages {
+        stage('SIMPLE CONDITION') {
+            when {
+                branch 'master'
+            }
+            steps {
+                echo('CONDITION - Executed (Only on master) !')
+            }
+        }
+        stage('INPUT CONDITION') {
+            when {
+                beforeInput true
+
+            }
+            input {
+                message "Proceed ?"
+                ok "Deploy the release ${env.RELEASE_NAME}"
+                parameters {
+                    string(name: 'CONTINUE', defaultValue: 'NO', description: 'XXXX')
+                }
+            }
+            steps {
+                echo('CONDITION - Executed !')
+                sh('env')
+            }
+        }
+        stage('DOCKER CONDITION') {
+            when {
+                environment name: 'DEPLOY_TO', value: 'production'
+            }
+            steps {
+                echo('DOCKER CONDITION - Executed')
+                sh('env')
+            }
+        }
+        
+    }
+    
+}

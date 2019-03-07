@@ -1,0 +1,56 @@
+pipeline {
+
+    // If none : Each stage should define it own agent
+    // Or a labeled agent
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        timeout(time: 1, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('INIT') {
+            steps {
+                echo('Write file : sample-file.txt')
+                writeFile([encoding: 'UTF-8', file: 'sample-file.txt', text: 'Hello World'])
+            }
+        }
+        stage('NO AGENT') {
+            steps {
+                echo('List files when no agent specified')
+                pwd()
+                sh('ls')
+            }
+        }
+        stage('AGENT - NO REUSE NODE') {
+            agent {
+                docker {
+                    image 'alpine:3.9'
+                    args  "-v /tmp:/tmp"
+                }
+            }
+            steps {
+                echo('List files when reuseNode is not defined')
+                pwd()
+                sh('ls')
+            }
+        }
+        stage('AGENT - REUSE NODE') {
+            agent {
+                docker {
+                    image 'alpine:3.9'
+                    args  "-v /tmp:/tmp"
+                    reuseNode true
+                }
+            }
+            steps {
+                echo('List files when reuseNode is set to true')
+                pwd()
+                sh('ls')
+            }
+        }
+    }
+    
+}

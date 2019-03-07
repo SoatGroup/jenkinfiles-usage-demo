@@ -1,0 +1,26 @@
+pipeline {
+
+    agent any
+
+    options {
+        timestamps()
+        quietPeriod(30)
+        preserveStashes()
+        skipDefaultCheckout()
+        disableConcurrentBuilds()
+        skipStagesAfterUnstable()
+        parallelsAlwaysFailFast()
+        overrideIndexTriggers(true)
+        timeout(time: 1, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '1'))
+    }
+
+    stages {
+        stage('HELLO WORLD') {
+            steps {
+                echo 'Hello from Jenkinsfile !'
+            }
+        }
+    }
+    
+}

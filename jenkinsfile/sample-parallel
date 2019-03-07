@@ -1,0 +1,73 @@
+pipeline {
+
+    agent any
+
+    options {
+        timestamps()
+        parallelsAlwaysFailFast()
+        disableConcurrentBuilds()
+        timeout(time: 1, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '1'))
+    }
+
+    stages {
+        stage('HELLO WORLD') {
+            steps {
+                echo 'Hello from Jenkinsfile !'
+            }
+        }
+        stage('PARALLEL HELLO') {
+            // Not required if parallelsAlwaysFailFast() is specified in options
+            failFast true
+            parallel {
+                stage('HELLO FROM BOB') {
+                    steps {
+                        echo 'Bob : Hello Jenkinsfile !'
+                    }
+                }
+                stage('HELLO FROM ALICE') {
+                    steps {
+                        echo 'Alice : Hello Jenkinsfile !'
+                    }
+                }
+                stage('HELLO FROM OSCAR') {
+                    steps {
+                        echo 'Oscar : Hello Jenkinsfile !'
+                    }
+                }
+            }
+        }
+        stage('PARALLEL HELLO FAILURE') {
+            failFast false
+            parallel {
+                stage('HELLO FROM BOB') {
+                    steps {
+                        echo 'Bob : Hello Jenkinsfile !'
+                    }
+                }
+                stage('HELLO FROM ALICE') {
+                    steps {
+                        echo 'Alice : Hello Jenkinsfile !'
+                    }
+                }
+                stage('HELLO FROM OSCAR') {
+                    steps {
+                        echo 'Oscar : Hello Jenkinsfile !'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always       { echo 'Always run' }
+        failure      { echo 'Run if the build status is [failure]' }
+        success      { echo 'Run if the build status is [success]' }
+        aborted      { echo 'Run if the build status is [aborted]' }
+        fixed        { echo 'Run if the build status is [success] and the previous build has a other status' }
+        changed      { echo 'Run if the build status is different than the previous build' }
+        regression   { echo 'Run if the build status is [failure, unstable, aborted] and the previous build was [success]'}
+        unstable     { echo 'Run if the build status is [unstable] (test failure)' }
+        unsuccessful { echo 'Run if the build status is not [success]' }
+    }
+}

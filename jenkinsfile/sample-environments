@@ -1,0 +1,43 @@
+pipeline {
+
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        timeout(time: 1, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('DESCRIPTION') {
+            steps {
+                echo("""
+                To run the this demo, create a new credentials ${JENKINS_URL}credentials/store/system/domain/_/newCredentials :
+                * Type : username / password
+                * ID : 'username-id'
+                """)
+                sh('env')
+            }
+        }
+        stage('ENVIRONMENTS') {
+            environment { 
+                SAMPLE_ENV_VAR = 'ENV_VAR_VALUE'
+            }
+            steps {
+                echo('Print env variables')
+                sh('env')
+            }
+        }
+        stage('ENVIRONMENTS / USERNAME-PASSWORD') {
+            environment { 
+                SECRET = credentials('username-id')
+            }
+            steps {
+                echo("Set the key 'username-id' in your secret here : ${JENKINS_URL}credentials/store/system/domain/_/newCredentials")
+                sh('env')
+            }
+        }
+    
+    }
+    
+}

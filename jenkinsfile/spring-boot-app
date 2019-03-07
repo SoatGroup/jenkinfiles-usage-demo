@@ -4,8 +4,9 @@
 
     options {
         timestamps()
+        skipStagesAfterUnstable()
         disableConcurrentBuilds()
-        timeout(time: 22, unit: 'MINUTES')
+        timeout(time: 25, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
@@ -18,7 +19,6 @@
                     doGenerateSubmoduleConfigurations: false,
                     userRemoteConfigs: [[url: 'https://github.com/SoatGroup/jenkinfiles-usage-demo']]
                 ])
-                stash([name: 'sample-spring-boot-app', includes: '**', ])
             }
         }
         
@@ -31,53 +31,33 @@
                 }
             }
             options {
-                timeout(time: 2, unit: 'MINUTES')
+                timeout(time: 5, unit: 'MINUTES')
             }
             steps {
-                sh("cd sample-spring-boot-app && ./mvnw compile")
+                sh("cd sample-spring-boot-app && ./mvnw --batch-mode compile")
             }
         }
         
         stage('TESTS') {
+            agent {
+                docker {
+                    image 'openjdk:11-jdk-slim'
+                    args '-v $HOME/.m2:/root/.m2'
+                    reuseNode true
+                }
+            }
             options {
-                timeout(time: 5, unit: 'MINUTES')
+                timeout(time: 10, unit: 'MINUTES')
             }
-            parallel {
-                stage('TESTS : JAVA 11') {
-                    agent {
-                        docker {
-                            image 'openjdk:11-jdk-slim'
-                            args '-v $HOME/.m2:/root/.m2'
-                        }
-                    }
-                    steps {
-                        unstash('sample-spring-boot-app')
-                        sh("cd sample-spring-boot-app && ./mvnw test")
-                    }
-                    post {
-                        always {
-                            junit "sample-spring-boot-app/**/TEST-*.xml"
-                        }
-                    }
-                }
-                stage('TESTS : JAVA 8') {
-                    agent {
-                        docker {
-                            image 'openjdk:8-jdk-slim'
-                            args '-v $HOME/.m2:/root/.m2'
-                        }
-                    }
-                    steps {
-                        unstash('sample-spring-boot-app')
-                        sh("cd sample-spring-boot-app && ./mvnw test")
-                    }
-                    post {
-                        always {
-                            junit "sample-spring-boot-app/**/TEST-*.xml"
-                        }
-                    }
+            steps {
+                sh("cd sample-spring-boot-app && ./mvnw --batch-mode test")
+            }
+            post {
+                always {
+                    junit "sample-spring-boot-app/**/TEST-*.xml"
                 }
             }
+            
         }
 
         stage('RELEASE') {
@@ -95,11 +75,11 @@
                 timeout(time: 10, unit: 'MINUTES')
             }
             steps {
-                sh("./mvnw --batch-mode release:prepare release:perform")
+                sh("cd sample-spring-boot-app && ./mvnw --batch-mode release:prepare release:perform")
             }
             post {
                 success {
-                    echo ("Success !!\nShould send email or a slack notif instead !")
+                    echo ("A new release have been made !!\nShould send email or a slack notif instead !")
                 }
             }
         }
@@ -108,7 +88,7 @@
 
     post {
         failure {
-            echo ("Failure !!\nShould send email or a slack notif instead !")
+            echo ("Something was wrong !!\nShould send email or a slack notif instead !")
         }
     }
 
