@@ -17,16 +17,19 @@ pipeline {
     stages {
         stage('SIMPLE CONDITION') {
             when {
-                branch 'master'
+                anyOf {
+                     branch 'master'
+                     expression { BRANCH_NAME ==~ /feature\/.*/ }
+                }
+               
             }
             steps {
-                echo('CONDITION - Executed (Only on master) !')
+                echo('CONDITION - Executed (Only on master and feature/* branch) !')
             }
         }
         stage('INPUT CONDITION') {
             when {
                 beforeInput true
-
             }
             input {
                 message "Proceed ?"
