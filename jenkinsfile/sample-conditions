@@ -24,7 +24,7 @@ pipeline {
         }
         stage('SEND EMAIL CONDITION') {
             when {
-                beforeInput true
+                beforeInput false
                 environment name: 'RELEASE_NAME', value: '1.0.0'
             }
             input {
