@@ -18,34 +18,77 @@ pipeline {
                 }
             }
             steps {
-                echo('CONDITION - Executed (Only on master and feature/* branch) !')
-                sh('env')
+                echo('Executed only on branch "master" and branch "feature/*" !')
             }
         }
-        stage('SEND EMAIL CONDITION') {
+        stage('FAKE SEND EMAIL CONDITION') {
             when {
                 beforeInput false
-                environment name: 'RELEASE_NAME', value: '1.0.0'
+                environment name: 'SEND_EMAIL', value: true
             }
             input {
                 message "Set the release name"
                 ok "Deploy the release"
                 parameters {
                     string(name: 'RELEASE_NAME', defaultValue: '0.0.1', description: 'The fake release name for templating')
-                    booleanParam(name: 'SEND_EMAIL', defaultValue: true, description: 'Should we send a fake email ?')
+                    booleanParam(name: 'SEND_EMAIL', defaultValue: true, description: 'Should we send a fake email (only yes will run this stage) ?')
                 }
             }
             steps {
-                echo("Template email with release name ${RELEASE_NAME} - Executed !")
+                echo("Executed fake send email - Template email with release name ${RELEASE_NAME} !")
             }
         }
-        stage('END') {
+        stage('NEVER EXECUTED') {
+            when {
+                environment name: 'RELEASE_NAME', value: '0.0.1'
+            }
             steps {
-                sh('env')
+                echo('Should never be executed !')
             }
         }
-       
-        
+        stage('NEVER EXECUTED - BEFORE INPUT') {
+            when {
+                beforeInput true
+                environment name: 'RELEASE_NAME', value: '0.0.1'
+            }
+            input {
+                message "Set the release name"
+                ok "Deploy the release"
+                parameters {
+                    string(name: 'RELEASE_NAME', defaultValue: '0.0.1', description: 'The fake release name for templating')
+                }
+            }
+            steps {
+                echo('Should never be executed !')
+            }
+        }
+        stage('DOCKER - START CONTAINER') {
+            when {
+                branch 'branch-that-doesnt-exist'
+            }
+            agent {
+                docker {
+                    image 'alpine:3.9'
+                }
+            }
+            steps {
+                echo('Should never be executed !')
+            }
+        }
+        stage('DOCKER - NO CONTAINER START') {
+            when {
+                beforeAgent true
+                branch 'branch-that-doesnt-exist'
+            }
+            agent {
+                docker {
+                    image 'alpine:3.9'
+                }
+            }
+            steps {
+                echo('Should never be executed !')
+            }
+        }
     }
     
 }
