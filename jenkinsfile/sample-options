@@ -1,3 +1,4 @@
+#!/usr/bin/env groovy
 pipeline {
 
     agent any
@@ -5,20 +6,39 @@ pipeline {
     options {
         timestamps()
         quietPeriod(30)
-        preserveStashes()
         skipDefaultCheckout()
         disableConcurrentBuilds()
         skipStagesAfterUnstable()
         parallelsAlwaysFailFast()
         overrideIndexTriggers(true)
+        preserveStashes(buildCount: 10)
         timeout(time: 1, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '1'))
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
     stages {
-        stage('HELLO WORLD') {
+        stage('DESCRIPTION') {
             steps {
-                echo 'Hello from Jenkinsfile !'
+                echo("""
+                This demo is made to discover pipeline options block :
+
+                Options description :
+                * buildDiscarder : Prevent log & artifact to be kept on Jenkins forever
+                * timeout : Prevent job to run forever
+                * timestamps : Add timestamp as first column
+                * disableConcurrentBuilds : Prevent to have 2 job running at the same time
+                * skipStagesAfterUnstable : Skip all stages after a stage is unstable
+                * skipDefaultCheckout : Skip  
+                * preserveStashes : Keep the stash of the last recent build. See documentation below
+                * overrideIndexTriggers :
+                * parallelsAlwaysFailFast :
+
+                Documentations :
+                * Options : https://jenkins.io/doc/book/pipeline/syntax/#options
+                * Stash step : https://jenkins.io/doc/pipeline/steps/workflow-basic-steps/#stash-stash-some-files-to-be-used-later-in-the-build
+
+                """)
+                sh('env')
             }
         }
     }

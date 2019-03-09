@@ -1,0 +1,81 @@
+#!/usr/bin/env groovy
+pipeline {
+
+    agent any
+
+    options {
+        skipStagesAfterUnstable()
+        disableConcurrentBuilds()
+        timeout(time: 2, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    stages {
+        stage('DESCRIPTION') {
+            steps {
+                echo('''
+                This demo is made to discover the script block :
+
+                Pipeline description :
+                * BASIC : Basic steps
+                * UNSTASH : Transmit data between 2 builds
+                * SCRIPT : Run a groovy script that may failed sometimes !
+
+                Documentation : https://jenkins.io/doc/pipeline/steps/workflow-basic-steps/
+                ''')
+            }
+        }
+        stage('BASIC') {
+            steps {
+                echo('Print something here !')
+                timestamps {
+                    sh('''
+                    for i in 1 2 3 4 5; do
+                        mkdir "dir-$i" && cd "dir-$i" && pwd && touch "loopfile-$i" && sleep 1;
+                    done
+                    ''')
+                }
+                pwd()
+                writeFile([encoding: 'UTF-8', file: 'sample-file.txt', text: 'Hello from Jenkinsfile !'])
+                stash([includes: 'dir-1/**', name: 'dir'])
+                stash('all')
+            }
+        }
+        stage('UNSTASH') {
+            steps {
+                unstash('all')
+                sh 'ls'
+                dir("./dir-1") {
+                    deleteDir()
+                }
+                sh 'ls'
+                readFile([encoding: 'UTF-8', file: 'sample-file.txt'])
+            }
+        }
+        stage('SCRIPT') {
+            steps {
+                unstash('dir')
+                script {
+                    if (!fileExists('./dir-1/loopfile-1')) {
+                        throw new Exception("File doesn't exist")
+                    }
+                }
+                retry(10) {
+                    script {
+                        if (new Random().nextInt(5) % 5 == 0) {
+                            error("Try again !")
+                        }
+                    }
+                    sleep(3)
+                }
+            }
+        }
+    }
+
+    post { 
+        always {
+            cleanWs()
+        }
+    }
+    
+}

@@ -1,0 +1,55 @@
+#!/usr/bin/env groovy
+pipeline {
+
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        timeout(time: 10, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    stages {
+        stage('DESCRIPTION') {
+            steps {
+                echo('''
+                This demo is made for AWS Credentials :
+                
+                Prerequirements :
+                * Use plugin `aws-credentials` : https://plugins.jenkins.io/aws-credentials
+                * Use plugin `pipeline-aws` : https://plugins.jenkins.io/pipeline-aws
+                * You have to create a new credentials ${JENKINS_URL}credentials/store/system/domain/_/newCredentials :
+                  * Type : AWS Credentials
+                  * ID : 'aws-id'
+                  * Access Key ID : Must be filled
+                  * Secret Access Key : Must be filled
+
+                Pipeline description :
+                * AWS : Use some credentials defined in ${JENKINS_URL}credentials and :
+                  * Launch a docker in steps to send a get-caller-identity request on sts service
+                  * Use the awsIdentity() step to retrieve the AWS user identity 
+
+                Documentation :
+                * AWS Credentials : https://plugins.jenkins.io/aws-credentials
+                * AWS Pipeline : https://plugins.jenkins.io/pipeline-aws
+                * Jenkins & Docker : https://jenkins.io/doc/book/pipeline/docker/ 
+                ''')
+            }
+        }
+        stage('AWS') {
+            steps {
+                withAWS(credentials: 'aws-id', region: 'eu-west-1') { // Provided by plugin aws-credentials
+                    echo('There is no official image of awscli - You can create your own image')
+                    script {
+                        docker.image('mikesir87/aws-cli:1.16.119').inside {
+                            sh('aws sts get-caller-identity')
+                        }
+                    }
+                    awsIdentity()
+                }
+            }
+        }
+    }
+    
+}

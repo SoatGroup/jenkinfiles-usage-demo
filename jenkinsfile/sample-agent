@@ -1,30 +1,76 @@
+#!/usr/bin/env groovy
 pipeline {
 
-    // If none : Each stage should define it own agent
-    // Or a labeled agent
-    agent any
+    agent { label 'master' }
 
     options {
         timestamps()
         disableConcurrentBuilds()
         timeout(time: 1, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
     stages {
+        stage('DESCRIPTION') {
+            steps {
+                echo('''
+                This demo is made to discover agent usage :
+
+                Prerequirements :
+                * Run the vagrant jenkins-slave instance :
+                  * Start the server instance : `vagrant up jenkins-slave --no-provision`
+                  * Provision the running instance : `vagrant provision jenkins-slave`
+                * Create a new credentials : http://vcap.me:8090/credentials/store/system/domain/_/newCredentials
+                  * Kind : SSH Username with private key
+                  * ID : 'vagrant-id'
+                  * Description : 'vagrant-id'
+                  * Username : 'vagrant'
+                  * Private key : https://raw.githubusercontent.com/SoatGroup/jenkinsfile-usage-demo/master/vagrant-images/data/server/demo-soat
+                * Create a node : http://vcap.me:8090/computer/new
+                  * Node name : 'jenkins-slave'
+                  * #2 of executors : 2
+                  * Remote root directory : /home/vagrant
+                  * Labels : 'vagrant docker'
+                  * Launch method : 'Launch agent agents via SSH'
+                    * Host : 10.0.0.150
+                    * Credentials : 'vagrant-id'
+                    * Host Key Verification Strategy : 'Non verifying Verification Strategy'
+
+                Pipeline description :
+                * INIT : Write a sample file - All other jobs will echo where there are running and the will print the current list of files
+                * NO AGENT : Run anywhere
+                * AGENT - SLAVE : Use the agent to run only on the jenkins-slave instance
+                * DOCKER : Use a docker container
+                * DOCKER - REUSE NODE : Use a docker container and reuse the current node
+                * DOCKER - ON SLAVE : Use a docker container on the slave machine
+                * DOCKER - REUSE NODE - WITH LABEL : Run a docker container - Reuse node is set to true : label is not use.
+
+                Documentation : https://jenkins.io/doc/book/pipeline/syntax/#agent
+                ''')
+            }
+        }
         stage('INIT') {
             steps {
-                echo('Write file : sample-file.txt')
+                echo("INIT : Running on ${NODE_NAME}")
                 writeFile([encoding: 'UTF-8', file: 'sample-file.txt', text: 'Hello World'])
             }
         }
         stage('NO AGENT') {
             steps {
-                echo('List files when no agent specified')
-                pwd()
-                sh('ls')
+                echo("NO AGENT : Running on ${NODE_NAME}")
+                sh('pwd && ls')
             }
         }
-        stage('AGENT - NO REUSE NODE') {
+        stage('AGENT - SLAVE') {
+            agent {
+                label 'vagrant'
+            }
+            steps {
+                echo("AGENT - SLAVE : Running on ${NODE_NAME}")
+                sh('pwd && ls')
+            }
+        }
+        stage('DOCKER') {
             agent {
                 docker {
                     image 'alpine:3.9'
@@ -32,12 +78,11 @@ pipeline {
                 }
             }
             steps {
-                echo('List files when reuseNode is not defined')
-                pwd()
-                sh('ls')
+                echo("DOCKER : Running on ${NODE_NAME}")
+                sh('pwd && ls')
             }
         }
-        stage('AGENT - REUSE NODE') {
+        stage('DOCKER - REUSE NODE') {
             agent {
                 docker {
                     image 'alpine:3.9'
@@ -46,10 +91,41 @@ pipeline {
                 }
             }
             steps {
-                echo('List files when reuseNode is set to true')
-                pwd()
-                sh('ls')
+                echo("DOCKER - REUSE NODE : Running on ${NODE_NAME}")
+                sh('pwd && ls')
             }
+        }
+        stage('DOCKER - ON SLAVE') {
+            agent {
+                docker {
+                    image 'alpine:3.9'
+                    args  "-v /proc/sys/kernel/hostname:/tmp/slave-hostname"
+                    label 'vagrant'
+                }
+            }
+            steps {
+                echo("DOCKER - ON SLAVE : Running on ${NODE_NAME}")
+                sh('pwd && ls')
+            }
+        }
+        stage('DOCKER - REUSE NODE - WITH LABEL') {
+            agent {
+                docker {
+                    image 'alpine:3.9'
+                    label 'vagrant'
+                    reuseNode true
+                }
+            }
+            steps {
+                echo("DOCKER - REUSE NODE - WITH LABEL : Running on ${NODE_NAME}")
+                sh('pwd && ls')
+            }
+        }
+    }
+    
+    post { 
+        always {
+            cleanWs()
         }
     }
     

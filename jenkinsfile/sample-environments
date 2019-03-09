@@ -1,3 +1,4 @@
+#!/usr/bin/env groovy
 pipeline {
 
     agent any
@@ -12,23 +13,38 @@ pipeline {
         stage('DESCRIPTION') {
             steps {
                 echo("""
-                To run the this demo, create a new credentials ${JENKINS_URL}credentials/store/system/domain/_/newCredentials :
-                * Type : username / password
-                * ID : 'username-id'
+                This demo is made for build environment variables :
+                
+                Prerequirements :
+                * Set new credentials ${JENKINS_URL}credentials/store/system/domain/_/newCredentials :
+                  * Type : username & password
+                  * ID : 'username-id'
+                  * Username !:
+
+                Pipeline description :
+                * ENVIRONMENTS : Show all available environments variables
+                * ENVIRONMENTS STAGE : Set a environment variable and show it's value
+                * ENVIRONMENTS WITH CREDENTIALS : Set some secrets in environment variable and print all available environments variables
+
+                Documentation : https://jenkins.io/doc/book/pipeline/syntax/#environment
                 """)
-                sh('env')
             }
         }
         stage('ENVIRONMENTS') {
+            steps {
+                echo('Print environments variables')
+                sh('env')
+            }
+        }
+        stage('ENVIRONMENTS WITH STAGE VALUE') {
             environment { 
                 SAMPLE_ENV_VAR = 'ENV_VAR_VALUE'
             }
             steps {
-                echo('Print env variables')
-                sh('env')
+                echo("SAMPLE_ENV_VAR variables can be use : ${SAMPLE_ENV_VAR}")
             }
         }
-        stage('ENVIRONMENTS / USERNAME-PASSWORD') {
+        stage('ENVIRONMENTS WITH CREDENTIALS') {
             environment { 
                 SECRET = credentials('username-id')
             }
@@ -37,7 +53,5 @@ pipeline {
                 sh('env')
             }
         }
-    
     }
-    
 }

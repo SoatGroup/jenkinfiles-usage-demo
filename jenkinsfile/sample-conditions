@@ -1,3 +1,4 @@
+#!/usr/bin/env groovy
 // WIP
 pipeline {
 
@@ -6,10 +7,29 @@ pipeline {
     options {
         timestamps()
         disableConcurrentBuilds()
-        timeout(time: 1, unit: 'MINUTES')
+        timeout(time: 5, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
     stages {
+        stage('DESCRIPTION') {
+            steps {
+                echo("""
+                This demo is made for running condionnal stage :
+
+                Pipeline description :
+                * SIMPLE CONDITION : Basic condition
+                * FAKE SEND EMAIL CONDITION : Execute a fake action with some prerequired user inputs
+                * NEVER EXECUTED : Never executed - Scope of RELEASE_NAME is only related to the stage
+                * NEVER EXECUTED - BEFORE INPUT : Never executed - When block run before input block
+                * DOCKER - START CONTAINER : Clone the repository & start a useless container because conditon will be false
+                * DOCKER - START CONTAINER NO CHECKOUT : Start a useless container but prevent checkout
+                * DOCKER - NO CONTAINER START : Prevent to run a useless container
+
+                Documentation : https://jenkins.io/doc/book/pipeline/syntax/#when
+                """)
+            }
+        }
         stage('SIMPLE CONDITION') {
             when {
                 anyOf {
@@ -70,6 +90,22 @@ pipeline {
                 docker {
                     image 'alpine:3.9'
                 }
+            }
+            steps {
+                echo('Should never be executed !')
+            }
+        }
+        stage('DOCKER - START CONTAINER NO CHECKOUT') {
+            when {
+                branch 'branch-that-doesnt-exist'
+            }
+            agent {
+                docker {
+                    image 'alpine:3.9'
+                }
+            }
+            options {
+                skipDefaultCheckout()
             }
             steps {
                 echo('Should never be executed !')

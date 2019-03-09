@@ -1,4 +1,5 @@
-  pipeline {
+#!/usr/bin/env groovy
+pipeline {
 
     agent any
 
@@ -11,16 +12,30 @@
     }
 
     stages {
-        stage('CHECKOUT') {
+        stage('DESCRIPTION') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*']],
-                    doGenerateSubmoduleConfigurations: false,
-                    userRemoteConfigs: [[url: 'https://github.com/SoatGroup/jenkinfiles-usage-demo']]
-                ])
+                echo('''
+                Sample of spring boot application :
+
+                Pipeline description :
+                * COMPILE : Compile application
+                * TESTS : Launch tests
+                * RELEASE : Execute release (only on master branch)
+                ''')
+                sh('env')
             }
         }
+
+        // stage('CHECKOUT') {
+        //     steps {
+        //         checkout([
+        //             $class: 'GitSCM',
+        //             branches: [[name: '*']],
+        //             doGenerateSubmoduleConfigurations: false,
+        //             userRemoteConfigs: [[url: 'https://github.com/SoatGroup/jenkinfiles-usage-demo']]
+        //         ])
+        //     }
+        // }
         
         stage('COMPILE') {
             agent {

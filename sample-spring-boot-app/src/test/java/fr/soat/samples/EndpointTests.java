@@ -42,6 +42,7 @@ class EndpointTests {
 
     @Nested
     @DisplayName("GET /jenkinsfile")
+    @AutoConfigureWebTestClient
     @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     class JenkinsfileEndpointTests {
 
@@ -64,6 +65,7 @@ class EndpointTests {
 
     @Nested
     @DisplayName("GET /user")
+    @AutoConfigureWebTestClient
     @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     class UserEndpointTests {
 
