@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage('DESCRIPTION') {
             steps {
-                echo('''
+                echo("""
                 Sample of spring boot application :
 
                 Requirements :
@@ -30,7 +30,7 @@ pipeline {
                 * CHECKOUT : Checkout the correct branch
                 * COMPILE : Compile application
                 * TESTS : Launch tests
-                ''')
+                """)
             }
         }
 
@@ -38,9 +38,9 @@ pipeline {
             steps {
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: '*']],
+                    branches: [[name: "${env.BRANCH_NAME}"]],
                     doGenerateSubmoduleConfigurations: false,
-                    userRemoteConfigs: [[url: 'https://github.com/SoatGroup/jenkinfiles-usage-demo']]
+                    userRemoteConfigs: [[credentialsId: 'github-id', url: 'https://github.com/SoatGroup/jenkinfiles-usage-demo']]
                 ])
                 stash([name: 'sample-spring-boot-app', includes: '**', ])
             }

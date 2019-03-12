@@ -7,35 +7,41 @@ pipeline {
         timestamps()
         skipStagesAfterUnstable()
         disableConcurrentBuilds()
-        timeout(time: 25, unit: 'MINUTES')
+        timeout(time: 40, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
     stages {
         stage('DESCRIPTION') {
             steps {
-                echo('''
+                echo("""
                 Sample of spring boot application :
+
+                Requirements :
+                * [Recommended] Set new credentials : ${JENKINS_URL}credentials/store/system/domain/_/newCredentials
+                  * Type : username & password
+                  * ID : 'github-id'
+                  * Username : YOUR_GITHUB_USER
+                  * Password : YOUR_GITHUB_PASSWORD
 
                 Pipeline description :
                 * COMPILE : Compile application
                 * TESTS : Launch tests
                 * RELEASE : Execute release (only on master branch)
-                ''')
-                sh('env')
+                """)
             }
         }
 
-        // stage('CHECKOUT') {
-        //     steps {
-        //         checkout([
-        //             $class: 'GitSCM',
-        //             branches: [[name: '*']],
-        //             doGenerateSubmoduleConfigurations: false,
-        //             userRemoteConfigs: [[url: 'https://github.com/SoatGroup/jenkinfiles-usage-demo']]
-        //         ])
-        //     }
-        // }
+        stage('CHECKOUT') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "${env.GIT_BRANCH}"]],
+                    doGenerateSubmoduleConfigurations: false,
+                    userRemoteConfigs: [[credentialsId: 'github-id', url: 'https://github.com/SoatGroup/jenkinfiles-usage-demo']]
+                ])
+            }
+        }
         
         stage('COMPILE') {
             agent {
@@ -46,7 +52,7 @@ pipeline {
                 }
             }
             options {
-                timeout(time: 5, unit: 'MINUTES')
+                timeout(time: 10, unit: 'MINUTES')
             }
             steps {
                 sh("cd sample-spring-boot-app && ./mvnw --batch-mode compile")
@@ -62,14 +68,14 @@ pipeline {
                 }
             }
             options {
-                timeout(time: 10, unit: 'MINUTES')
+                timeout(time: 15, unit: 'MINUTES')
             }
             steps {
                 sh("cd sample-spring-boot-app && ./mvnw --batch-mode test")
             }
             post {
                 always {
-                    junit "sample-spring-boot-app/**/TEST-*.xml"
+                    junit 'sample-spring-boot-app/**/TEST-*.xml'
                 }
             }
             
@@ -87,7 +93,7 @@ pipeline {
                 }
             }
             options {
-                timeout(time: 10, unit: 'MINUTES')
+                timeout(time: 15, unit: 'MINUTES')
             }
             steps {
                 sh("cd sample-spring-boot-app && ./mvnw --batch-mode release:prepare release:perform")
@@ -102,6 +108,9 @@ pipeline {
     }
 
     post {
+        always {
+            cleanWs()
+        }
         failure {
             echo ("Something was wrong !!\nShould send email or a slack notif instead !")
         }
