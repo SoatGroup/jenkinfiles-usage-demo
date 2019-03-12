@@ -34,18 +34,6 @@ pipeline {
             }
         }
 
-        stage('CHECKOUT') {
-            steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: "${env.BRANCH_NAME}"]],
-                    doGenerateSubmoduleConfigurations: false,
-                    userRemoteConfigs: [[credentialsId: 'github-id', url: 'https://github.com/SoatGroup/jenkinfiles-usage-demo']]
-                ])
-                stash([name: 'sample-spring-boot-app', includes: '**', ])
-            }
-        }
-        
         stage('COMPILE') {
             agent {
                 docker {

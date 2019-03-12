@@ -31,17 +31,6 @@ pipeline {
                 """)
             }
         }
-
-        stage('CHECKOUT') {
-            steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: "${env.GIT_BRANCH}"]],
-                    doGenerateSubmoduleConfigurations: false,
-                    userRemoteConfigs: [[credentialsId: 'github-id', url: 'https://github.com/SoatGroup/jenkinfiles-usage-demo']]
-                ])
-            }
-        }
         
         stage('COMPILE') {
             agent {
