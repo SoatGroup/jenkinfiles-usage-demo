@@ -1,0 +1,118 @@
+#!/usr/bin/env groovy
+// WIP
+pipeline {
+
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        skipStagesAfterUnstable()
+        parallelsAlwaysFailFast()
+        timeout(time: 45, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    stages {
+        stage('DESCRIPTION') {
+            steps {
+                echo('''
+                Sample of spring boot application :
+
+                Requirements :
+                * [Recommended] Set new credentials : ${JENKINS_URL}credentials/store/system/domain/_/newCredentials
+                  * Type : username & password
+                  * ID : 'github-id'
+                  * Username : YOUR_GITHUB_USER
+                  * Password : YOUR_GITHUB_PASSWORD
+
+                Pipeline description :
+                * CHECKOUT : Checkout the correct branch
+                * COMPILE : Compile application
+                * TESTS : Launch tests
+                ''')
+            }
+        }
+
+        stage('CHECKOUT') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*']],
+                    doGenerateSubmoduleConfigurations: false,
+                    userRemoteConfigs: [[url: 'https://github.com/SoatGroup/jenkinfiles-usage-demo']]
+                ])
+                stash([name: 'sample-spring-boot-app', includes: '**', ])
+            }
+        }
+        
+        stage('COMPILE') {
+            agent {
+                docker {
+                    image 'openjdk:11-jdk-slim'
+                    args '-v $HOME/.m2:/root/.m2'
+                    reuseNode true
+                }
+            }
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
+            steps {
+                sh("cd sample-spring-boot-app && ./mvnw --batch-mode compile")
+            }
+        }
+        
+        stage('TESTS') {
+            options {
+                timeout(time: 20, unit: 'MINUTES')
+            }
+            parallel {
+                stage('TESTS : JAVA 11') {
+                    agent {
+                        docker {
+                            image 'openjdk:11-jdk-slim'
+                            args '-v $HOME/.m2:/root/.m2'
+                        }
+                    }
+                    steps {
+                        unstash('sample-spring-boot-app')
+                        sh("cd sample-spring-boot-app && ./mvnw --batch-mode test")
+                    }
+                    post {
+                        always {
+                            junit "sample-spring-boot-app/**/TEST-*.xml"
+                        }
+                    }
+                }
+                stage('TESTS : JAVA 8') {
+                    agent {
+                        docker {
+                            image 'openjdk:8-jdk-slim'
+                            args '-v $HOME/.m2:/root/.m2'
+                        }
+                    }
+                    steps {
+                        unstash('sample-spring-boot-app')
+                        sh("cd sample-spring-boot-app && ./mvnw --batch-mode test")
+                    }
+                    post {
+                        always {
+                            junit "sample-spring-boot-app/**/TEST-*.xml"
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        failure {
+            echo ("Something was wrong !!\nShould send email or a slack notif instead !")
+        }
+    }
+
+}

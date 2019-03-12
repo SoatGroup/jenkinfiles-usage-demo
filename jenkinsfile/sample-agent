@@ -16,7 +16,7 @@ pipeline {
                 echo('''
                 This demo is made to discover agent usage :
 
-                Prerequirements :
+                Requirements :
                 * Run the vagrant jenkins-slave instance :
                   * Start the server instance : `vagrant up jenkins-slave --no-provision`
                   * Provision the running instance : `vagrant provision jenkins-slave`
@@ -32,7 +32,7 @@ pipeline {
                   * Remote root directory : /home/vagrant
                   * Labels : 'vagrant docker'
                   * Launch method : 'Launch agent agents via SSH'
-                    * Host : 10.0.0.150
+                    * Host : '192.168.10.30'
                     * Credentials : 'vagrant-id'
                     * Host Key Verification Strategy : 'Non verifying Verification Strategy'
 

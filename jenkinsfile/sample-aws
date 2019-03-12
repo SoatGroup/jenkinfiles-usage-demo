@@ -16,7 +16,7 @@ pipeline {
                 echo('''
                 This demo is made for AWS Credentials :
                 
-                Prerequirements :
+                Requirements :
                 * Use plugin `aws-credentials` : https://plugins.jenkins.io/aws-credentials
                 * Use plugin `pipeline-aws` : https://plugins.jenkins.io/pipeline-aws
                 * You have to create a new credentials ${JENKINS_URL}credentials/store/system/domain/_/newCredentials :

@@ -14,7 +14,7 @@ pipeline {
                 echo("""
                 This demo is made for SSH Testing :
                 
-                Prerequirements :
+                Requirements :
                 * Run the vagrant server instance :
                   * Start the server instance : `vagrant up server --no-provision`
                   * Provision the running instance : `vagrant provision server`
@@ -32,15 +32,17 @@ pipeline {
                 Documentation :
                 * Credentials documentation : https://jenkins.io/doc/pipeline/steps/credentials-binding/
                 * Credentials plugin : https://plugins.jenkins.io/credentials-binding
-                * SSH Agent plugin : https://plugins.jenkins.io/ssh-agent
+                * Take a look at the SSH Agent Plugin : https://plugins.jenkins.io/ssh-agent
                 """)
             }
         }
+
         stage('SSH') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: "jenkins-ssh-id", keyFileVariable: "SSH_PRIVATE_KEY", usernameVariable: "SSH_USERNAME")]) {
                    sh("""
-                   ssh -o StrictHostKeyChecking=no -i ${SSH_PRIVATE_KEY} ${SSH_USERNAME}@192.168.10.40 ''echo "Remote hostname : \$(hostname)"''
+                   hostname
+                   ssh -o StrictHostKeyChecking=no -i ${SSH_PRIVATE_KEY} ${SSH_USERNAME}@192.168.10.40 'echo "Remote hostname : \$(hostname)"'
                    """)
                 }
             }

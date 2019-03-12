@@ -15,11 +15,11 @@ pipeline {
                 echo("""
                 This demo is made for build environment variables :
                 
-                Prerequirements :
-                * Set new credentials ${JENKINS_URL}credentials/store/system/domain/_/newCredentials :
+                Requirements :
+                * Set new credentials : ${JENKINS_URL}credentials/store/system/domain/_/newCredentials
                   * Type : username & password
                   * ID : 'username-id'
-                  * Username !:
+                  * Username :
 
                 Pipeline description :
                 * ENVIRONMENTS : Show all available environments variables

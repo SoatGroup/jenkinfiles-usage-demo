@@ -12,6 +12,20 @@ pipeline {
     }
 
     stages {
+        stage('DESCRIPTION') {
+            steps {
+                echo("""
+                This demo is made for post actions :
+                
+                Pipeline description :
+                * HELLO WORLD : Print a sample echo when the all steps end successfully
+                * RANDOM : May failed in most case
+
+                Documentation : https://jenkins.io/doc/book/pipeline/syntax/#post
+                """)
+            }
+        }
+
         stage('HELLO WORLD') {
             steps {
                 echo 'Hello from Jenkinsfile !'
@@ -22,13 +36,25 @@ pipeline {
                 }
             }
         }
+
         stage('RANDOM') {
             steps {
-                echo 'Hello from Jenkinsfile !'
+                script {
+                    if (new Random().nextInt(5) % 5 != 0) {
+                        error("I'm not polite and I didn't say hello to anyone !")
+                    }
+                    echo 'Hello from Jenkinsfile !'
+                }
             }
             post {
+                always {
+                    echo 'I hear something !'
+                }
                 success {
                     echo 'I just hear a Hello !'
+                }
+                failure {
+                    echo 'Ho ! You should discover good manner !'
                 }
             }
         }
