@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
-springBoot(
-        credentialId='github-id',
-        repository='https://github.com/SoatGroup/jenkinsfile-usage-demo/',
-        folder='sample-spring-boot-app'
-)
+springBoot([
+        credentialId: 'github-id',
+        repository: 'https://github.com/SoatGroup/jenkinsfile-usage-demo/',
+        folder: 'sample-spring-boot-app'
+])
