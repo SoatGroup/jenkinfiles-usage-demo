@@ -1,5 +1,5 @@
 #!/usr/bin/env groovy
-@Library('sample-shared-libraries@sample-shared-libraries/shared-library') _
+@Library('sample-shared-libraries@feature/wip/sample-shared-libraries/shared-library') _
 //@Library('sample-shared-libraries@sample-shared-libraries/shared-library')
 springBoot(
         credentialId='github-id',
