@@ -36,7 +36,7 @@ pipeline {
             agent {
                 docker {
                     image 'openjdk:11-jdk-slim'
-                    args '-v $HOME/.m2:/root/.m2'
+                    args '-v $HOME/.m2:/.m2'
                     reuseNode true
                 }
             }
@@ -52,7 +52,7 @@ pipeline {
             agent {
                 docker {
                     image 'openjdk:11-jdk-slim'
-                    args '-v $HOME/.m2:/root/.m2'
+                    args '-v $HOME/.m2:/.m2'
                     reuseNode true
                 }
             }
@@ -77,7 +77,7 @@ pipeline {
             agent {
                 docker {
                     image 'openjdk:11-jdk-slim'
-                    args '-v $HOME/.m2:/root/.m2'
+                    args '-v $HOME/.m2:/.m2'
                     reuseNode true
                 }
             }
