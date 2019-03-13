@@ -9,6 +9,10 @@ pipeline {
         timeout(time: 1, unit: 'MINUTES')
     }
 
+    environment {
+        GLOBAL_ENV_VAR = 'GLOBAL_ENV_VALUE'
+    }
+
     stages {
         stage('DESCRIPTION') {
             steps {

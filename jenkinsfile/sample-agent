@@ -35,6 +35,8 @@ pipeline {
                     * Host : '192.168.10.30'
                     * Credentials : 'vagrant-id'
                     * Host Key Verification Strategy : 'Non verifying Verification Strategy'
+                  * Check the `Environment variables`
+                    * Add a variable : `USER_HOME` = `/home/vagrant`
 
                 Pipeline description :
                 * INIT : Write a sample file - All other jobs will echo where there are running and the will print the current list of files
@@ -59,6 +61,7 @@ pipeline {
             steps {
                 echo("NO AGENT : Running on ${NODE_NAME}")
                 sh('pwd && ls')
+                sh('env')
             }
         }
         stage('AGENT - SLAVE') {
@@ -68,6 +71,7 @@ pipeline {
             steps {
                 echo("AGENT - SLAVE : Running on ${NODE_NAME}")
                 sh('pwd && ls')
+                sh('env')
             }
         }
         stage('DOCKER') {
@@ -80,6 +84,7 @@ pipeline {
             steps {
                 echo("DOCKER : Running on ${NODE_NAME}")
                 sh('pwd && ls')
+                sh('env')
             }
         }
         stage('DOCKER - REUSE NODE') {
@@ -93,6 +98,7 @@ pipeline {
             steps {
                 echo("DOCKER - REUSE NODE : Running on ${NODE_NAME}")
                 sh('pwd && ls')
+                sh('env')
             }
         }
         stage('DOCKER - ON SLAVE') {
@@ -119,6 +125,7 @@ pipeline {
             steps {
                 echo("DOCKER - REUSE NODE - WITH LABEL : Running on ${NODE_NAME}")
                 sh('pwd && ls')
+                sh('env')
             }
         }
     }
