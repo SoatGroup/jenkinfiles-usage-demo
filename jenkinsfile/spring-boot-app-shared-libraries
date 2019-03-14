@@ -1,0 +1,4 @@
+#!/usr/bin/env groovy
+springBoot([
+        folder: 'sample-spring-boot-app'
+])

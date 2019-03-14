@@ -51,10 +51,6 @@ pipeline {
             }
         }
 
-        stage('SETTINGS') {
-
-        }
-
         stage('COMPILE') {
             agent {
                 docker {
@@ -90,7 +86,6 @@ pipeline {
                     junit 'sample-spring-boot-app/**/TEST-*.xml'
                 }
             }
-            
         }
 
         stage('RELEASE') {
@@ -117,7 +112,6 @@ pipeline {
                 }
             }
         }
-
     }
 
     post {
